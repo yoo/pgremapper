@@ -42,6 +42,8 @@ var (
 
 	pgQueryPeerRegexp = regexp.MustCompile(`(?P<osd>[0-9]+)(?:\((?P<index>[0-9]+)\))?`)
 	pgIdRegexp        = regexp.MustCompile(`(?P<pool>[0-9]+)\.(?P<id>[0-9a-f]+)`)
+
+	infReplacement = fmt.Sprintf(":%f,", math.MaxFloat64)
 )
 
 type pgUpmapItem struct {
@@ -749,7 +751,8 @@ func parseCephCommand(out string, err error, v interface{}) error {
 		return err
 	}
 
-	if err := json.Unmarshal([]byte(out), v); err != nil {
+	cleanedOut := strings.ReplaceAll(out, ":inf,", infReplacement)
+	if err := json.Unmarshal([]byte(cleanedOut), v); err != nil {
 		return err
 	}
 
